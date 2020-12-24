@@ -1,7 +1,17 @@
 <html>
   <head>
 <style>
-
+  #pager{
+    display: flex;
+    justify-content: space-between;
+  }
+  a{
+  	padding: .5rem;
+  }
+  .selected{
+    background-color: black;
+    color: white;
+  }
 </style>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
   </head>
@@ -10,8 +20,40 @@
     <div id='pager'></div>
     <div id='results'></div>
 <script>
-    const API_KEY= 'YOUR API KEY';
-    const BASE_URL = `https://api.harvardartmuseums.org/object?apikey=${ API_KEY}&hasimage=1&period=Modern&sort=id&size=50`;
+    const API_KEY= '263e0294-7b87-483f-944b-4f613501f34c';
+    const BASE_URL = `https://api.harvardartmuseums.org/object?apikey=${ API_KEY}&hasimage=1&period=Modern&sort=id&size=50&page=`;
+    
+    async function fetchData(){
+      $('#pager').empty();
+      $('#results').empty();
+      const page = window.location.hash.slice(1) || 1;
+      const response = await fetch(BASE_URL+page);
+      const {info, records} = await response.json();
+      records.forEach(function(record){
+        console.log(record.primaryimageurl);
+        $('#results').append($(`
+          <div>
+            ${record.title}
+            <br/>
+            ${record.description|| ''}
+          </div>
+          <hr/>
+        `));
+      })
+      const pageCount = info.pages;
+      for (let i = 1; i <= pageCount; i++){
+        $('#pager').append($(`
+        	<a href='#${i}'>${i}</a>
+        `).addClass(page*1 === i ? 'selected': ''));
+      }
+      
+    }
+    
+    
+    
+    fetchData();
+    
+    window.addEventListener('hashchange', fetchData);
 </script>
   </body>
 </html>
